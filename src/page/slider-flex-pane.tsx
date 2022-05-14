@@ -7,11 +7,11 @@ type Props = {
 } & PropsWithChildren<any>
 
 export const SliderFlexPane = (props: Props) => {
-    const [flexColumn, setFlexColumn] = useState(4)
+    const [flexColumn, setFlexColumn] = useState(12 / (props.defaultColumn ?? 3))
     const [templateColumn, setTemplateColumn] = useState("12fr")
 
     useEffect(() => {
-        columnChange(props.defaultColumn)
+        columnChange(flexColumn)
     }, [])
     const columnChange = (column: number) => {
         switch (column) {

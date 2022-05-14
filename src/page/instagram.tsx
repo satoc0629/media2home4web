@@ -5,24 +5,60 @@ import {SliderFlexPane} from "./slider-flex-pane";
 const Instagram = () => {
 
     const [urls, setUrls] = useState([] as string[])
-    const [contentWidth, setContentWidth] = useState(window.parent.screen.width)
+    const [started, setStarted] = useState([] as number[])
+    const [contentWidth, setContentWidth] = useState(window.parent.window.innerWidth)
+    // const [contentWidth, setContentWidth] = useState(window.parent.screen.width)
 
     const setColumns = (columns: number) => {
-        setContentWidth(window.parent.screen.width / columns)
+        setContentWidth(window.parent.window.innerWidth / columns)
+        // setContentWidth(window.parent.screen.width / columns)
+    }
+    function playVideos(videoWrappers: HTMLCollectionOf<Element>) {
+        const startPosition = window.scrollY + window.innerHeight;
+        for(let i = 0; i < videoWrappers.length; i++) {
+            // 描画範囲全体の上からみて今の画面表示の下限位置
+            const videoPosition = videoWrappers[i].getBoundingClientRect().top + window.scrollY;
+            if(startPosition > videoPosition) {
+                const video = videoWrappers[i].getElementsByTagName('video');
+                if (!started.includes(i)) {
+                    console.log(`start target:${i}, urls:${urls[i]}`)
+                    video[0].src = `http://192.168.1.11/media/instagram/${urls[i]}`
+                    video[0].play();
+                    setStarted(started=>{
+                        started.push(i)
+                        return started
+                    })
+                }
+            }
+        }
     }
 
     useEffect(() => {
         fetch("http://192.168.1.11/media/instagram/ls_json.php").then(r => r.json()).then((r: string[]) => {
-            setUrls(r)
+            setUrls(r.filter(r=>r!=="ls_json.php"))
         })
     }, [])
+    useEffect(()=>{
+        const videoWrappers = document.getElementsByClassName('video_wrapper');
+        if(videoWrappers.length) {
+            // 初期表示地点から呼ぶ
+            playVideos(videoWrappers);
+            // スクロールの都度、呼ぶ
+            window.addEventListener('scroll', function() {
+                playVideos(videoWrappers);
+            }, false);
+        }
+    }, [urls])
 
     return <>
         <SliderFlexPane setColumns={setColumns}>
-            {shuffleArray(urls).filter(e => e !== "ls_json.php").map(u => {
-                return <video controls autoPlay loop muted playsInline width={contentWidth}>
-                    <source src={`http://192.168.1.11/media/instagram/${u}`} type={"video/mp4"}/>
-                </video>
+            {shuffleArray(urls).map((url,i) => {
+                return <div className={"video_wrapper"} style={{maxWidth: contentWidth, width: contentWidth}}>
+                    <video controls loop muted playsInline
+                           width={contentWidth}
+                           preload={"none"}>
+                    <source id={`source${i}`} type={"video/mp4"}/>
+                </video></div>
             })}
         </SliderFlexPane>
     </>
