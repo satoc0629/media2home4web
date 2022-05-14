@@ -57,7 +57,7 @@ export const SliderFlexPane = (props: Props) => {
         <div style={{width: "97vw", marginLeft: "1vw"}}>
             <Slider
                 aria-label="Temperature"
-                defaultValue={4}
+                defaultValue={flexColumn}
                 onChange={handleOnChange}
                 valueLabelDisplay="auto"
                 step={1}
