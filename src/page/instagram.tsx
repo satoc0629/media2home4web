@@ -1,14 +1,34 @@
-import {useEffect, useState} from "react";
+import {useEffect, useLayoutEffect, useState} from "react";
 import {shuffleArray} from "../shuffle-array";
 import {SliderFlexPane} from "./slider-flex-pane";
+import {Fab} from "@mui/material";
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import StopIcon from '@mui/icons-material/Stop';
 
 const Instagram = () => {
 
     const [urls, setUrls] = useState([] as string[])
     const [started, setStarted] = useState([] as number[])
     const [contentWidth, setContentWidth] = useState(window.parent.window.innerWidth)
+    const [autoScroll, setAutoScroll] = useState(false)
+    const [autoScrollSpeed, setAutoScrollSpeed] = useState(3)
+    const [autoScrollButtonX, setAutoScrollButtonX] = useState("43vw")
 
     const setColumns = (columns: number) => {
+        switch (columns) {
+            case 1:
+                setAutoScrollButtonX("90vw")
+                setAutoScrollSpeed(4)
+                break
+            case 2:
+                setAutoScrollSpeed(2)
+                setAutoScrollButtonX("43vw")
+                break
+            case 3:
+            default:
+                setAutoScrollSpeed(1)
+                setAutoScrollButtonX("90vw")
+        }
         setContentWidth(window.parent.window.innerWidth / columns)
     }
 
@@ -54,7 +74,30 @@ const Instagram = () => {
         }
     }, [urls])
 
+    function playOrStop() {
+        setAutoScroll(!autoScroll)
+    }
+    useEffect(() => {
+        if (!autoScroll) {
+            return
+        }
+        const finalizerId = setInterval(() => {
+            window.scrollBy(0, autoScrollSpeed)
+        }, 16)
+        return () => clearTimeout(finalizerId)
+    }, [autoScroll])
+
     return <>
+        <Fab color="primary" aria-label="add" onClick={() => playOrStop()} style={{
+            margin: 0,
+            top: 'auto',
+            right: autoScrollButtonX,
+            bottom: "45vh",
+            left: 'auto',
+            position: 'fixed',
+        }}>
+            {autoScroll ? <StopIcon/> : <PlayArrowIcon/>}
+        </Fab>
         <SliderFlexPane setColumns={setColumns} defaultColumn={2}>
             {shuffleArray(urls).map((url, i) => {
                 return <div className={"video_wrapper"} style={{maxWidth: contentWidth, width: contentWidth}}>
