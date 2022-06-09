@@ -18,15 +18,15 @@ const Instagram = () => {
         switch (columns) {
             case 1:
                 setAutoScrollButtonX("90vw")
-                setAutoScrollSpeed(4)
+                setAutoScrollSpeed(18)
                 break
             case 2:
-                setAutoScrollSpeed(2)
+                setAutoScrollSpeed(6)
                 setAutoScrollButtonX("43vw")
                 break
             case 3:
             default:
-                setAutoScrollSpeed(1)
+                setAutoScrollSpeed(3)
                 setAutoScrollButtonX("90vw")
         }
         setContentWidth(window.parent.window.innerWidth / columns)
@@ -81,10 +81,13 @@ const Instagram = () => {
         if (!autoScroll) {
             return
         }
-        const finalizerId = setInterval(() => {
-            window.scrollBy(0, autoScrollSpeed)
-        }, 16)
-        return () => clearTimeout(finalizerId)
+        const firstScroll = setInterval(() => {
+            window.scrollBy({
+                top: autoScrollSpeed,
+                behavior: "smooth"
+            })
+        }, 100)
+        return () => clearTimeout(firstScroll)
     }, [autoScroll])
 
     return <>
